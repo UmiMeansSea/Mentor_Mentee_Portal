@@ -19,7 +19,8 @@ export default function ChatPage() {
   // Init socket
   useEffect(() => {
     const token = localStorage.getItem('token');
-    socketRef.current = io('/', { auth: { token }, transports: ['websocket'] });
+    const SERVER = import.meta.env.VITE_API_URL || '';
+    socketRef.current = io(SERVER, { auth: { token }, transports: ['websocket'] });
 
     socketRef.current.on('message:receive', (msg) => {
       setMessages(prev => [...prev, msg]);
