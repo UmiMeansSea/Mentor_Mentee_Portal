@@ -8,9 +8,24 @@ const setupSocket = require('./socket/chat');
 const app = express();
 const server = http.createServer(app);
 
-// Use the Vercel URL you found in the screenshot
+// The exact URL of your Vercel frontend
 const CLIENT_URL = "https://mentor-mentee-portal.vercel.app";
 
+// 1. CORS Configuration for Express
+app.use(cors({
+  origin: CLIENT_URL,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// 2. Explicit Pre-flight handler (Fixes persistent CORS blocks)
+app.options('*', cors());
+
+// 3. Body Parser Middleware
+app.use(express.json());
+
+// 4. Socket.io Configuration
 const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
@@ -18,14 +33,6 @@ const io = new Server(server, {
     credentials: true,
   },
 });
-
-// Middleware
-app.use(cors({ 
-  origin: CLIENT_URL, 
-  credentials: true 
-}));
-
-app.use(express.json());
 
 // Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -40,15 +47,15 @@ app.use('/api/admin', require('./routes/admin'));
 app.get('/health', (req, res) => res.json({ 
   status: 'ok', 
   timestamp: new Date(),
-  clientAllowed: CLIENT_URL 
+  allowedOrigin: CLIENT_URL 
 }));
 
-// Socket.io
+// Socket.io Setup
 setupSocket(io);
 
+// Railway dynamic port handling
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📡 Allowing requests from: ${CLIENT_URL}`);
-  console.log(`🔌 Socket.io ready`);
+  console.log(`📡 Access granted to: ${CLIENT_URL}`);
 });
