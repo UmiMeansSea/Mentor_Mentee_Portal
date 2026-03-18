@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node node_modules/.bin/prisma migrate deploy && node src/index.js",
     "dev": "nodemon src/index.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
